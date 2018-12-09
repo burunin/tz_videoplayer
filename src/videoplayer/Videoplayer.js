@@ -1,29 +1,103 @@
 import React, { Component } from "react";
-import source from "../../src/videoplayer/video.mp4";
+import source from "../../src/assets/video.mp4";
 import "./Videoplayer.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default class Videoplayer extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      mediaTime: 0
-    };
-    this.state = { progress: 0, currentTime: 0 };
+    this.state = { mediaTime: 0 };
+    this.state = { progress: 0, currentTime: 0, paused: false };
     this.video = React.createRef();
+    this.fwd = React.createRef();
+    this.rwd = React.createRef();
     this.timerWrapper = React.createRef();
     this.intervalFwd = undefined;
     this.intervalRwd = undefined;
   }
 
-  stopMedia() {
-    this.video.current.pause();
+  stopMedia(e) {
+    this.pause();
     this.video.current.currentTime = 0;
-    // rwd.classList.remove('active');
-    // fwd.classList.remove('active');
     clearInterval(this.intervalRwd);
     clearInterval(this.intervalFwd);
-    // play.setAttribute('data-icon','P');
+    return e ? e.stopPropagation() : 0;
+  }
+
+  play() {
+    this.setState({ paused: false });
+    return this.video.current.play();
+  }
+
+  pause() {
+    this.setState({ paused: true });
+    return this.video.current.pause();
+  }
+
+  playPauseMedia() {
+    clearInterval(this.intervalRwd);
+    clearInterval(this.intervalFwd);
+    if (this.video.current.paused) {
+      this.video.current.play();
+      this.setState({
+        paused: false
+      });
+    } else {
+      this.video.current.pause();
+      this.setState({
+        paused: true
+      });
+    }
+  }
+
+  mediaBackward() {
+    clearInterval(this.intervalFwd);
+
+    if (this.rwd.current.classList.contains("active")) {
+      this.rwd.current.classList.remove("active");
+      clearInterval(this.intervalRwd);
+      this.play();
+    } else {
+      this.pause();
+      this.intervalRwd = setInterval(
+        () => this.windBackward(this.video.current),
+        200
+      );
+    }
+  }
+
+  mediaForward(video) {
+    clearInterval(this.intervalRwd);
+
+    this.rwd.current.classList.remove("active");
+
+    if (this.fwd.current.classList.contains("active")) {
+      this.fwd.current.classList.remove("active");
+      clearInterval(this.intervalFwd);
+      this.play();
+    } else {
+      this.pause();
+      this.intervalFwd = setInterval(
+        () => this.windForward(this.video.current),
+        200
+      );
+    }
+  }
+
+  windBackward(video) {
+    if (video.currentTime <= 2) {
+      this.stopMedia();
+    } else {
+      video.currentTime -= 2;
+    }
+  }
+
+  windForward(video) {
+    if (video.currentTime >= video.duration - 2) {
+      this.stopMedia();
+    } else {
+      video.currentTime += 2;
+    }
   }
 
   setTime() {
@@ -57,36 +131,56 @@ export default class Videoplayer extends Component {
 
     return (
       <div className="player">
-        <video
-          autoPlay={true}
-          ref={this.video}
-          onTimeUpdate={() => this.setTime()}
-          onEnded={() => this.stopMedia()}
-        >
-          <source src={source} type="video/mp4" />
-        </video>
+        <div className="video-container">
+          <video
+            autoPlay={true}
+            ref={this.video}
+            onTimeUpdate={() => this.setTime()}
+            onEnded={() => this.stopMedia()}
+          >
+            <source src={source} type="video/mp4" />
+          </video>
+        </div>
         <div className="controls">
-          <button className="play">
-            <FontAwesomeIcon
-              icon="play"
-              size="4x"
-              className="control-icon play"
-            />
-          </button>
-          <button className="stop" onClick={() => this.stopMedia()}>
-            <FontAwesomeIcon
-              icon="stop"
-              size="4x"
-              className="control-icon stop"
-            />
-          </button>
+          <div
+            className="control-icon play"
+            onClick={() => this.playPauseMedia()}
+          >
+            {this.state.paused ? (
+              <FontAwesomeIcon
+                icon="play"
+                size="2x"
+                className="control-icon play"
+              />
+            ) : (
+              <FontAwesomeIcon
+                icon="pause"
+                size="2x"
+                className="control-icon play"
+              />
+            )}
+          </div>
+          <div className="control-icon stop" onClick={e => this.stopMedia(e)}>
+            <FontAwesomeIcon icon="stop" size="2x" className="stop" />
+          </div>
+          <div
+            className="control-icon stop this.rwd"
+            onClick={() => this.mediaBackward()}
+            ref={this.rwd}
+          >
+            <FontAwesomeIcon icon="fast-backward" size="2x" className="stop" />
+          </div>
+          <div
+            className="control-icon stop this.fwd"
+            onClick={() => this.mediaForward()}
+            ref={this.fwd}
+          >
+            <FontAwesomeIcon icon="fast-forward" size="2x" className="stop" />
+          </div>
           <div className="timer" ref={this.timerWrapper}>
             <div style={progressWidth} />
-            <FontAwesomeIcon icon="envelope" />
             <span>{this.state.mediaTime}</span>
           </div>
-          <button className="rwd" data-icon="B" aria-label="rewind" />
-          <button className="fwd" data-icon="F" aria-label="fast forward" />
         </div>
       </div>
     );
