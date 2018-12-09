@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import source from "../../src/videoplayer/video.mp4";
-import "./Videoplayer.css";
+import "./Videoplayer.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default class Videoplayer extends Component {
