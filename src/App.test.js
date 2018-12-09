@@ -1,9 +1,17 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
+import React from "react";
+import ReactDOM from "react-dom";
+import { shallow } from "enzyme";
+import App from "./App";
+import Videoplayer from "./videoplayer/Videoplayer";
 
-it('renders without crashing', () => {
-  const div = document.createElement('div');
-  ReactDOM.render(<App />, div);
-  ReactDOM.unmountComponentAtNode(div);
+describe("App", () => {
+  let wrapper;
+
+  beforeEach(() => {
+    wrapper = shallow(<App />);
+  });
+
+  test("should have the `video` element", () => {
+    expect(wrapper.contains(<Videoplayer />)).toBe(true);
+  });
 });

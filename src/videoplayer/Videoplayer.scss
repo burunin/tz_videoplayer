@@ -1,7 +1,9 @@
 .control-icon {
   color: white;
   padding: 4px;
-  &.stop {
+  &.stop,
+  &.rwd,
+  &.fwd {
     align-self: center;
   }
 }

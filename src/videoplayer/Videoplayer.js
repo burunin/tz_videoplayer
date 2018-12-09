@@ -52,7 +52,6 @@ export default class Videoplayer extends Component {
 
   mediaBackward() {
     clearInterval(this.intervalFwd);
-
     if (this.rwd.current.classList.contains("active")) {
       this.rwd.current.classList.remove("active");
       clearInterval(this.intervalRwd);
@@ -68,9 +67,7 @@ export default class Videoplayer extends Component {
 
   mediaForward(video) {
     clearInterval(this.intervalRwd);
-
     this.rwd.current.classList.remove("active");
-
     if (this.fwd.current.classList.contains("active")) {
       this.fwd.current.classList.remove("active");
       clearInterval(this.intervalFwd);
@@ -134,6 +131,7 @@ export default class Videoplayer extends Component {
         <div className="video-container">
           <video
             autoPlay={true}
+            className="video-screen"
             ref={this.video}
             onTimeUpdate={() => this.setTime()}
             onEnded={() => this.stopMedia()}
@@ -156,7 +154,7 @@ export default class Videoplayer extends Component {
               <FontAwesomeIcon
                 icon="pause"
                 size="2x"
-                className="control-icon play"
+                className="control-icon pause"
               />
             )}
           </div>
@@ -164,14 +162,14 @@ export default class Videoplayer extends Component {
             <FontAwesomeIcon icon="stop" size="2x" className="stop" />
           </div>
           <div
-            className="control-icon stop this.rwd"
+            className="control-icon rwd"
             onClick={() => this.mediaBackward()}
             ref={this.rwd}
           >
             <FontAwesomeIcon icon="fast-backward" size="2x" className="stop" />
           </div>
           <div
-            className="control-icon stop this.fwd"
+            className="control-icon fwd"
             onClick={() => this.mediaForward()}
             ref={this.fwd}
           >
