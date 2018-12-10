@@ -1,3 +1,7 @@
+## Some comments
+For deployment of this app needed any of HTTP servers for serving static files.
+Interested in Continuous Integration for development and deployment because of convenient way of running tests before build, i.e.. Only used Gitlab for CI.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
