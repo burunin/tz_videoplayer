@@ -13,10 +13,6 @@ export default class Videoplayer extends Component {
     this.intervalRwd = undefined;
   }
 
-  componentDidMount() {
-    return this.video.current.canplay ? this.play() : 0;
-  }
-
   stopMedia(e) {
     this.pause();
     this.video.current.currentTime = 0;
@@ -154,10 +150,15 @@ export default class Videoplayer extends Component {
           <div
             className="control-icon rwd"
             onClick={() => this.mediaBackward()}
+            ref={this.rwd}
           >
             <FontAwesomeIcon icon="fast-backward" size="2x" className="stop" />
           </div>
-          <div className="control-icon fwd" onClick={() => this.mediaForward()}>
+          <div
+            className="control-icon fwd"
+            onClick={() => this.mediaForward()}
+            ref={this.fwd}
+          >
             <FontAwesomeIcon icon="fast-forward" size="2x" className="stop" />
           </div>
           <div className="timer" ref={this.timerWrapper}>
