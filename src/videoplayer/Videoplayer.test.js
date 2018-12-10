@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import { shallow, mount } from "enzyme";
 import Videoplayer from "./Videoplayer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+jest.useFakeTimers();
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -82,6 +83,15 @@ describe("App", () => {
     expect(wrapper.instance().setTime).toHaveBeenCalled();
   });
 
+  test("check Constructor", () => {
+    wrapper.instance().super = jest.fn();
+    expect(wrapper.state()).toEqual({
+      mediaTime: 0,
+      progress: 0,
+      currentTime: 0,
+      paused: false
+    });
+  });
   describe("test methods", () => {
     test("check stopMedia", () => {
       wrapper = mount(<Videoplayer />);
@@ -96,9 +106,41 @@ describe("App", () => {
     test("check play", () => {
       wrapper = mount(<Videoplayer />);
       wrapper.instance().video.current.play = jest.fn();
-      wrapper.find(".control-icon.play").simulate("click");
-      expect(wrapper.instance().video.current.play).toHaveBeenCalled();
+      wrapper.instance().play();
       expect(wrapper.state().paused).toBe(false);
+    });
+
+    test("check play", () => {
+      wrapper = mount(<Videoplayer />);
+      wrapper.instance().video.current.pause = jest.fn();
+      wrapper.instance().pause();
+      expect(wrapper.state().paused).toBe(true);
+    });
+
+    test("check play", () => {
+      wrapper = mount(<Videoplayer />);
+      wrapper.instance().video = {
+        current: {
+          paused: true
+        }
+      };
+      wrapper.instance().video.current.play = jest.fn();
+      wrapper.instance().video.current.pause = jest.fn();
+      wrapper.find(".control-icon.play").simulate("click");
+      expect(wrapper.state().paused).toBe(false);
+    });
+
+    test("check play", () => {
+      wrapper = mount(<Videoplayer />);
+      wrapper.instance().video = {
+        current: {
+          paused: false
+        }
+      };
+      wrapper.instance().video.current.play = jest.fn();
+      wrapper.instance().video.current.pause = jest.fn();
+      wrapper.find(".control-icon.play").simulate("click");
+      expect(wrapper.state().paused).toBe(true);
     });
 
     test("check pause", () => {
@@ -107,9 +149,90 @@ describe("App", () => {
       wrapper.find(".stop.control-icon").simulate("click");
       expect(wrapper.instance().video.current.pause).toHaveBeenCalled();
       expect(wrapper.state().paused).toBe(true);
+      expect(wrapper.instance().intervalFwd).toBeUndefined();
+      expect(wrapper.instance().intervalRwd).toBeUndefined();
     });
 
-    test("check pausePlayMedia1", () => {});
-    test("check pausePlayMedia2", () => {});
+    test("check mediaBackward", () => {
+      wrapper = mount(<Videoplayer />);
+      wrapper.instance().video.current.play = jest.fn();
+      wrapper.instance().video.current.pause = jest.fn();
+      wrapper.instance().windBackward = jest.fn().mockImplementation(() => 1);
+      wrapper.find(".rwd.control-icon").simulate("click");
+      jest.useFakeTimers();
+      expect(wrapper.instance().windBackward()).toEqual(1);
+      expect(wrapper.instance().intervalRwd).toBe(1);
+    });
+
+    test("check mediaForward", () => {
+      wrapper = mount(<Videoplayer />);
+      wrapper.instance().video.current.play = jest.fn();
+      wrapper.instance().video.current.pause = jest.fn();
+      wrapper.instance().windForward = jest.fn().mockImplementation(() => 1);
+      wrapper.find(".fwd.control-icon").simulate("click");
+      jest.useFakeTimers();
+      expect(wrapper.instance().windForward()).toEqual(1);
+      expect(wrapper.instance().intervalFwd).toBe(2);
+    });
+
+    test("check windBackward stop", () => {
+      wrapper.instance().stopMedia = jest.fn().mockReturnValue(1);
+      var mockVideo = { currentTime: 0, duration: 0 };
+      wrapper.instance().windBackward(mockVideo);
+      expect(wrapper.instance().stopMedia()).toBe(1);
+    });
+
+    test("check windForward stop ", () => {
+      var mockVideo = {
+        currentTime: 0,
+        duration: 0
+      };
+      wrapper.instance().stopMedia = jest.fn().mockReturnValue(1);
+      wrapper.instance().windForward(mockVideo);
+      expect(wrapper.instance().stopMedia()).toBe(1);
+    });
+
+    test("check windBackward forward", () => {
+      wrapper.instance().stopMedia = jest.fn().mockReturnValue(1);
+      var mockVideo = { currentTime: 5, duration: 0 };
+      wrapper.instance().windBackward(mockVideo);
+      expect(mockVideo.currentTime).toBe(3);
+    });
+
+    test("check windForward forward", () => {
+      var mockVideo = { currentTime: 5, duration: 20 };
+      wrapper.instance().stopMedia = jest.fn().mockReturnValue(1);
+      wrapper.instance().windForward(mockVideo);
+      expect(mockVideo.currentTime).toBe(7);
+    });
+
+    test("check setTime", () => {
+      wrapper.instance().video = {
+        current: {
+          currentTime: 3,
+          duration: 15
+        }
+      };
+      wrapper.instance().timerWrapper = {
+        current: { clientWidth: 100 }
+      };
+
+      wrapper.find(".video-screen").simulate("timeUpdate");
+      wrapper.instance().setTime();
+      expect(wrapper.state().mediaTime).toBe("00:03");
+      expect(wrapper.state().progressBarLength).toBe(20);
+    });
+
+    test("check setTime", () => {
+      wrapper.instance().video = {
+        current: { currentTime: 50, duration: 150 }
+      };
+      wrapper.instance().timerWrapper = { current: { clientWidth: 300 } };
+
+      wrapper.find(".video-screen").simulate("timeUpdate");
+      wrapper.instance().setTime();
+      expect(wrapper.state().mediaTime).toBe("00:50");
+      expect(wrapper.state().progressBarLength).toBe(100);
+    });
   });
 });

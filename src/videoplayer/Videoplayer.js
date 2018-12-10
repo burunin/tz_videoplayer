@@ -6,14 +6,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 export default class Videoplayer extends Component {
   constructor(props) {
     super(props);
-    this.state = { mediaTime: 0 };
-    this.state = { progress: 0, currentTime: 0, paused: false };
+    this.state = { mediaTime: 0, progress: 0, currentTime: 0, paused: false };
     this.video = React.createRef();
-    this.fwd = React.createRef();
-    this.rwd = React.createRef();
     this.timerWrapper = React.createRef();
     this.intervalFwd = undefined;
     this.intervalRwd = undefined;
+  }
+
+  componentDidMount() {
+    return this.video.current.canplay ? this.play() : 0;
   }
 
   stopMedia(e) {
@@ -52,33 +53,22 @@ export default class Videoplayer extends Component {
 
   mediaBackward() {
     clearInterval(this.intervalFwd);
-    if (this.rwd.current.classList.contains("active")) {
-      this.rwd.current.classList.remove("active");
-      clearInterval(this.intervalRwd);
-      this.play();
-    } else {
-      this.pause();
-      this.intervalRwd = setInterval(
-        () => this.windBackward(this.video.current),
-        200
-      );
-    }
+    clearInterval(this.intervalRwd);
+    this.pause();
+    this.intervalRwd = setInterval(
+      () => this.windBackward(this.video.current),
+      200
+    );
   }
 
-  mediaForward(video) {
+  mediaForward() {
+    clearInterval(this.intervalFwd);
     clearInterval(this.intervalRwd);
-    this.rwd.current.classList.remove("active");
-    if (this.fwd.current.classList.contains("active")) {
-      this.fwd.current.classList.remove("active");
-      clearInterval(this.intervalFwd);
-      this.play();
-    } else {
-      this.pause();
-      this.intervalFwd = setInterval(
-        () => this.windForward(this.video.current),
-        200
-      );
-    }
+    this.pause();
+    this.intervalFwd = setInterval(
+      () => this.windForward(this.video.current),
+      200
+    );
   }
 
   windBackward(video) {
@@ -164,15 +154,10 @@ export default class Videoplayer extends Component {
           <div
             className="control-icon rwd"
             onClick={() => this.mediaBackward()}
-            ref={this.rwd}
           >
             <FontAwesomeIcon icon="fast-backward" size="2x" className="stop" />
           </div>
-          <div
-            className="control-icon fwd"
-            onClick={() => this.mediaForward()}
-            ref={this.fwd}
-          >
+          <div className="control-icon fwd" onClick={() => this.mediaForward()}>
             <FontAwesomeIcon icon="fast-forward" size="2x" className="stop" />
           </div>
           <div className="timer" ref={this.timerWrapper}>
